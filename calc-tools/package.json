@@ -1,0 +1,8 @@
+{
+  "name": "vgc-calc-tools",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "dependencies": {
+    "@smogon/calc": "^0.9.0"
+  }
+}
