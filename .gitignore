@@ -5,3 +5,4 @@ __pycache__/
 .env
 data/cache/*.json
 *.log
+*local-command-caveat*.txt
