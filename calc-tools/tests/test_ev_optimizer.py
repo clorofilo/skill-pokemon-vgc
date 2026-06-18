@@ -25,3 +25,18 @@ def test_survive_threshold_returns_evs():
     assert "evs" in result
     assert result["evs"]["hp"] + result["evs"]["spd"] <= 252 * 2
     assert "remaining" in result
+
+def test_outspeed_threshold_returns_spe_evs():
+    # Timid nature Calyrex-Shadow (base 150 spe) outspeeds Incineroar (base 60 spe = 95 stat at 0 EVs)
+    # With 0 EVs, Calyrex-Shadow Timid = floor((150*2+31+0)*50/100+5)*1.1 = floor(331*0.5+5)*1.1 = floor(170.5)*1.1 = 170*1.1 = 187
+    # So requesting outspeed 186 should need 0 EVs
+    payload = {
+        "pokemon": {"species": "Calyrex-Shadow", "item": "Choice Specs", "nature": "Timid"},
+        "targets": [{"type": "outspeed", "target_speed": 120}]
+    }
+    result = run_optimizer(payload)
+    assert "evs" in result
+    assert "spe" in result["evs"]
+    assert result["evs"]["spe"] >= 0
+    assert "notes" in result
+    assert any("spe" in note.lower() or "outspeed" in note.lower() for note in result["notes"])

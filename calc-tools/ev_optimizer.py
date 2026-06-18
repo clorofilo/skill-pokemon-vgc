@@ -1,4 +1,5 @@
 import json
+import math
 import sys
 from typing import Any
 
@@ -27,6 +28,20 @@ class OptimizerInput(BaseModel):
 
 EV_STEPS = list(range(0, 253, 4))
 DEFENSIVE_STATS = ["hp", "def", "spd"]
+
+SPEED_BASES = {
+    "Calyrex-Shadow": 150, "Flutter Mane": 135, "Chien-Pao": 135,
+    "Iron Bundle": 136, "Urshifu": 97, "Urshifu-Rapid-Strike": 97,
+    "Incineroar": 60, "Landorus-Therian": 91, "Tornadus": 111,
+    "Rillaboom": 85, "Amoonguss": 30, "Farigiraf": 60, "Iron Hands": 50,
+    "Miraidon": 135, "Koraidon": 98, "Calyrex-Ice": 50,
+}
+
+NATURE_MODIFIERS = {
+    "Timid": 1.1, "Jolly": 1.1, "Hasty": 1.1, "Naive": 1.1,
+    "Modest": 1.0, "Adamant": 1.0, "Bold": 1.0, "Careful": 1.0,
+    "Quiet": 0.9, "Brave": 0.9, "Relaxed": 0.9, "Sassy": 0.9,
+}
 
 
 def calc_damage_with_evs(pokemon: PokemonDef, threshold: SurviveThreshold) -> dict:
@@ -78,6 +93,24 @@ def main():
             for stat, val in res["evs"].items():
                 result_evs[stat] = max(result_evs.get(stat, 0), val)
             all_notes.extend(res["notes"])
+        elif target_raw.get("type") == "outspeed":
+            target_speed = target_raw.get("target_speed", 0)
+            base_spe = SPEED_BASES.get(opt_input.pokemon.species, 80)
+            nat_mod = NATURE_MODIFIERS.get(opt_input.pokemon.nature or "", 1.0)
+
+            min_spe_evs = None
+            for spe_evs in range(0, 253, 4):
+                stat = math.floor((base_spe * 2 + 31 + math.floor(spe_evs / 4)) * 50 / 100 + 5)
+                actual = math.floor(stat * nat_mod)
+                if actual > target_speed:
+                    min_spe_evs = spe_evs
+                    break
+
+            if min_spe_evs is not None:
+                result_evs["spe"] = max(result_evs.get("spe", 0), min_spe_evs)
+                all_notes.append(f"Needs {min_spe_evs} Spe EVs to outspeed {target_speed}")
+            else:
+                all_notes.append(f"Cannot outspeed {target_speed} even with 252 Spe EVs")
 
     total_used = sum(result_evs.values())
     print(json.dumps({
