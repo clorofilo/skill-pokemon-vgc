@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "vgc-assistant": {
+      "command": "node",
+      "args": ["mcp-server/dist/index.js"],
+      "cwd": "."
+    }
+  },
+  "permissions": {
+    "allow": [
+      "Bash(npm:*)",
+      "Bash(node:*)",
+      "Bash(python:*)",
+      "Bash(pip:*)",
+      "Bash(pytest:*)",
+      "Bash(npx:*)",
+      "Bash(git:*)"
+    ]
+  }
+}
