@@ -77,10 +77,6 @@ Read the user's message and choose exactly one flow:
 - **Never** finalize a set without assigning and justifying the Tera Type
 - **Never** suggest a team with zero speed control
 - **Never** skip calling MCP tools when they are available — estimates are a last resort
-- **Never** ignore type coverage holes — every team must hit at least 4 defensive types
-- **Never** recommend an EV spread without verifying it actually survives/OHKOs the stated target
-- **Never** build a team with 2+ Pokémon sharing the same Tera Type without explicit user approval
-- **Never** finalize a lead without explaining why it wins/loses vs top 3 meta threats
 
 ## MCP Tools Reference
 
