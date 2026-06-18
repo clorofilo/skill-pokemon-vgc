@@ -2,8 +2,7 @@
   "mcpServers": {
     "vgc-assistant": {
       "command": "node",
-      "args": ["mcp-server/dist/index.js"],
-      "cwd": "."
+      "args": ["C:\\Codigos\\vgc-app\\mcp-server\\dist\\index.js"]
     }
   },
   "permissions": {
