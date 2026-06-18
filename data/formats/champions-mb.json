@@ -1,0 +1,37 @@
+{
+  "id": "champions-mb",
+  "name": "Pokémon Champions — Reglamento MB",
+  "generation": 9,
+  "gameType": "Doubles",
+  "teamSize": 6,
+  "bringCount": 4,
+  "showdownFormatId": "gen9pokemonchampions",
+  "mechanics": {
+    "terastallization": true,
+    "zmoves": false,
+    "megaEvolution": false,
+    "dynamax": false
+  },
+  "clauses": ["Species Clause", "Item Clause"],
+  "topThreats": [
+    "Calyrex-Shadow",
+    "Urshifu-Rapid-Strike",
+    "Incineroar",
+    "Flutter Mane",
+    "Rillaboom",
+    "Landorus-Therian",
+    "Tornadus",
+    "Amoonguss",
+    "Farigiraf",
+    "Iron Hands",
+    "Miraidon",
+    "Koraidon"
+  ],
+  "keySpeedBenchmarks": [
+    { "pokemon": "Incineroar", "baseSpeed": 60, "note": "Common speed target for slow builds" },
+    { "pokemon": "Amoonguss", "baseSpeed": 30, "note": "Trick Room target" },
+    { "pokemon": "Flutter Mane", "baseSpeed": 135, "note": "Fast tier benchmark" },
+    { "pokemon": "Calyrex-Shadow", "baseSpeed": 150, "note": "Fastest common threat" }
+  ],
+  "notes": "Verify showdownFormatId against current Showdown ladder. Update topThreats monthly from usage stats."
+}
