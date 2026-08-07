@@ -21,6 +21,19 @@ export interface ViableSet {
   teraType?: string;
 }
 
+export function viableSetsCacheKey(pokemon: string, format: string): string {
+  return `sets-${format.toLowerCase()}-${pokemon.toLowerCase()}`;
+}
+
+function formatGenPrefix(format: string): string {
+  const m = format.match(/^gen(\d+)/i);
+  return m ? `gen${m[1]}` : "gen9";
+}
+
+export function viableSetsUrl(format: string): string {
+  return `https://play.pokemonshowdown.com/data/sets/${formatGenPrefix(format)}.json`;
+}
+
 export class CacheManager {
   isOffline = false;
 
@@ -82,14 +95,14 @@ export class CacheManager {
     return entries.find((e) => e.pokemon.toLowerCase() === pokemon.toLowerCase()) ?? null;
   }
 
-  async getViableSets(pokemon: string, _format: string): Promise<ViableSet[]> {
-    const cacheKey = `sets-${pokemon.toLowerCase()}`;
+  async getViableSets(pokemon: string, format: string): Promise<ViableSet[]> {
+    const cacheKey = viableSetsCacheKey(pokemon, format);
     const cached = await this.readCache<ViableSet[]>(cacheKey);
     if (cached) return cached;
 
     // Showdown sets endpoint — returns empty array if unavailable (offline fallback)
     try {
-      const resp = await fetch(`https://play.pokemonshowdown.com/data/sets/gen9.json`);
+      const resp = await fetch(viableSetsUrl(format));
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const all = await resp.json() as Record<string, unknown>;
       const sets = (all[pokemon] as ViableSet[] | undefined) ?? [];

@@ -2,7 +2,7 @@
   "mcpServers": {
     "vgc-assistant": {
       "command": "node",
-      "args": ["C:\\Codigos\\vgc-app\\mcp-server\\dist\\index.js"]
+      "args": ["C:\\Codigos\\private\\skill-pokemon-vgc\\mcp-server\\dist\\index.js"]
     }
   },
   "permissions": {

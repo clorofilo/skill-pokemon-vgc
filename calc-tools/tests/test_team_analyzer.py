@@ -141,3 +141,18 @@ def test_no_speed_control_emits_note():
     # Incineroar and Flutter Mane have no speed control moves
     result = run_analyzer(SAMPLE_PASTE)
     assert any("No speed control" in note for note in result["notes"])
+
+
+def test_nicknamed_pokemon_species_parsed_from_parens():
+    paste = """
+Bulky Boy (Incineroar) @ Assault Vest
+Ability: Intimidate
+EVs: 252 HP / 4 Atk / 252 SpD
+Careful Nature
+- Fake Out
+- Knock Off
+- U-turn
+- Flare Blitz
+""".strip()
+    result = run_analyzer(paste)
+    assert result["members"][0]["species"] == "Incineroar"

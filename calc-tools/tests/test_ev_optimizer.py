@@ -1,8 +1,10 @@
-import subprocess, json
+import subprocess, sys, json
 from pathlib import Path
 
 SCRIPT = Path(__file__).parent.parent / "ev_optimizer.py"
 CALC_DIR = Path(__file__).parent.parent
+sys.path.insert(0, str(CALC_DIR))
+import ev_optimizer  # noqa: E402
 
 def run_optimizer(payload):
     r = subprocess.run(["python", str(SCRIPT)], input=json.dumps(payload),
@@ -60,6 +62,56 @@ def test_outspeed_impossible_emits_note():
     result = run_optimizer(payload)
     assert "spe" not in result["evs"]
     assert any("Cannot outspeed" in note for note in result["notes"])
+
+
+def test_outspeed_unknown_species_flags_assumed_base_speed():
+    # "Garchomp" is Reg M-B's #1 usage Pokémon but was missing from the local
+    # SPEED_BASES table, silently falling back to base 80 with no indication
+    # the number might be wrong.
+    payload = {
+        "pokemon": {"species": "Definitely-Not-A-Real-Species", "item": "Choice Scarf", "nature": "Jolly"},
+        "targets": [{"type": "outspeed", "target_speed": 100}]
+    }
+    result = run_optimizer(payload)
+    assert any("not in local table" in note.lower() or "assumed" in note.lower() for note in result["notes"])
+
+
+def test_outspeed_garchomp_uses_correct_base_speed():
+    # Garchomp base Speed is 102, not the 80 fallback.
+    # Jolly (x1.1) at 0 EVs: floor((102*2+31)*50/100+5) = floor(122.5)=122 -> *1.1 -> floor(134.2)=134
+    payload = {
+        "pokemon": {"species": "Garchomp", "item": "Choice Band", "nature": "Jolly"},
+        "targets": [{"type": "outspeed", "target_speed": 130}]
+    }
+    result = run_optimizer(payload)
+    assert result["evs"].get("spe", 0) == 0
+    assert not any("not in local table" in note.lower() for note in result["notes"])
+
+
+def test_survive_search_finds_true_minimum_across_hp_values(monkeypatch):
+    # Synthetic bulk model: survives iff 3*hp + spd >= 760 (HP is the more
+    # EV-efficient stat here). At hp=0 no spd (max 252) can reach 760, so a
+    # search that locks onto the *first* hp where some spd works stops at
+    # hp=172/spd=244 (total 416) and never checks whether a larger hp beats
+    # it. The true minimum is hp=252/spd=4 (total 256).
+    def fake_calc(pokemon, threshold):
+        hp = pokemon.evs.get("hp", 0)
+        spd = pokemon.evs.get("spd", 0)
+        survives = (3 * hp + spd) >= 760
+        return {"koText": "" if survives else "guaranteed OHKO"}
+
+    monkeypatch.setattr(ev_optimizer, "calc_damage_with_evs", fake_calc)
+
+    pokemon = ev_optimizer.PokemonDef(species="Incineroar", nature="Careful")
+    threshold = ev_optimizer.SurviveThreshold(
+        attacker=ev_optimizer.PokemonDef(species="Calyrex-Shadow"),
+        move="Astral Barrage",
+    )
+    result = ev_optimizer.find_min_evs_to_survive(pokemon, threshold)
+    total = result["evs"]["hp"] + result["evs"]["spd"]
+    assert total == 256
+    assert result["evs"]["hp"] == 252
+    assert result["evs"]["spd"] == 4
 
 
 def test_remaining_evs_is_correct():

@@ -8,7 +8,7 @@ export function registerUsageTool(server: McpServer) {
     "Get usage statistics for a Pokémon in the given format. Returns usage % and rank.",
     {
       pokemon: z.string().describe("Pokémon species name (e.g. 'Incineroar')"),
-      format: z.string().describe("Showdown format ID (e.g. 'gen9pokemonchampions')"),
+      format: z.string().describe("Showdown format ID (e.g. 'gen9championsvgc2026regmb')"),
     },
     async ({ pokemon, format }) => {
       const entry = await cacheManager.getUsageStats(pokemon, format);

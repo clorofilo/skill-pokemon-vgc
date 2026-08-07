@@ -1,6 +1,6 @@
 # vgc-app — Pokémon Champions VGC Assistant
 
-Asistente de análisis competitivo para el formato **Pokémon Champions Reglamento MB** (dobles, 6 registrar / 4 traer, Teracristalización activa), integrado con Claude Code.
+Asistente de análisis competitivo para el formato **Pokémon Champions Reglamento M-B** (dobles, 6 registrar / 4 traer, Mega Evolution activa, Teracristalización **no** disponible en esta regulación), integrado con Claude Code.
 
 ---
 
@@ -128,23 +128,28 @@ pip install -r requirements.txt
 
 ### Ejemplos de uso
 
+Nota: `teraType` sigue siendo un parámetro válido en `damage_calc.py`/`ev_optimizer.py`
+(útil para otros formatos o una futura regulación), pero **no aplica a Reg M-B**, donde
+Terastallization está inactiva y Mega Evolution es el mecanismo activo. Omítelo para
+cálculos fieles al formato actual.
+
 ```bash
 # Cálculo de daño
 echo '{
-  "attacker": {"species":"Calyrex-Shadow","item":"Choice Specs","nature":"Timid","evs":{"spa":252},"teraType":"Psychic"},
+  "attacker": {"species":"Garchomp","item":"Choice Band","nature":"Jolly","evs":{"atk":252}},
   "defender": {"species":"Incineroar","item":"Assault Vest","nature":"Careful","evs":{"hp":252,"spd":252}},
-  "move": "Astral Barrage"
+  "move": "Earthquake"
 }' | python damage_calc.py
 
 # Optimización de EVs (survive)
 echo '{
   "pokemon": {"species":"Incineroar","item":"Assault Vest","nature":"Careful"},
-  "targets": [{"type":"survive","attacker":{"species":"Calyrex-Shadow","item":"Choice Specs","nature":"Timid","evs":{"spa":252}},"move":"Astral Barrage"}]
+  "targets": [{"type":"survive","attacker":{"species":"Garchomp","item":"Choice Band","nature":"Jolly","evs":{"atk":252}},"move":"Earthquake"}]
 }' | python ev_optimizer.py
 
 # Optimización de EVs (outspeed)
 echo '{
-  "pokemon": {"species":"Flutter Mane","item":"Choice Specs","nature":"Timid"},
+  "pokemon": {"species":"Whimsicott","item":"Focus Sash","nature":"Timid"},
   "targets": [{"type":"outspeed","target_speed":130}]
 }' | python ev_optimizer.py
 
@@ -155,23 +160,23 @@ echo '{
 
 # Simulación de turno
 echo '{
-  "state": {"side_a":["Incineroar","Flutter Mane"],"side_b":["Calyrex-Shadow","Rillaboom"],"weather":null,"terrain":null},
+  "state": {"side_a":["Incineroar","Garchomp"],"side_b":["Kingambit","Whimsicott"],"weather":null,"terrain":null},
   "moves": [
-    {"user":"Incineroar","move":"Fake Out","target":"Calyrex-Shadow"},
-    {"user":"Flutter Mane","move":"Moonblast","target":"Calyrex-Shadow"}
+    {"user":"Incineroar","move":"Fake Out","target":"Kingambit"},
+    {"user":"Garchomp","move":"Earthquake","target":"Kingambit"}
   ]
 }' | python turn_simulator.py
 
 # Análisis de leads
 echo '{
-  "team": ["Incineroar","Flutter Mane","Rillaboom","Urshifu-Rapid-Strike","Landorus-Therian","Amoonguss"],
-  "meta": ["Calyrex-Shadow","Flutter Mane"]
+  "team": ["Incineroar","Garchomp","Whimsicott","Kingambit","Sylveon","Amoonguss"],
+  "meta": ["Garchomp","Sinistcha"]
 }' | python lead_analyzer.py
 
 # Matriz de matchups
 echo '{
   "team_paste": "Incineroar @ Assault Vest\n...",
-  "threats": ["Calyrex-Shadow","Flutter Mane"]
+  "threats": ["Garchomp","Kingambit"]
 }' | python matchup_matrix.py
 ```
 
@@ -180,21 +185,27 @@ echo '{
 ```bash
 # Desde la raíz del repo
 pytest calc-tools/tests/ -v
-# 31 tests — priority ordering, weather/terrain, synergy bonus,
-# matchup matrix, outspeed EVs, EV remaining, tera type, speed control...
+# 35 tests — priority ordering, weather/terrain, synergy bonus,
+# matchup matrix, outspeed EVs, EV remaining, tera type, speed control,
+# nicknamed pastes, EV-optimality across HP/SpD, unknown-species fallback...
 ```
 
 ---
 
-## Formato: Pokémon Champions Reglamento MB
+## Formato: Pokémon Champions Reglamento M-B
+
+Vigente 2026-06-17 → 2026-09-02. Verificar `memory/format_data.md` cuando cambie la
+letra de regulación — Tera/Mega se alternan entre regulaciones.
 
 | Campo | Valor |
 |---|---|
 | Modalidad | Dobles |
 | Equipo | 6 registrados, 4 traídos a batalla |
-| Teracristalización | Activa |
-| Z-moves / Mega / Dynamax | Inactivos |
+| Mega Evolution | Activa (1 por batalla, especies seleccionadas) |
+| Teracristalización | **No disponible** en esta regulación |
+| Z-moves / Dynamax | Inactivos |
 | Generación | 9 (Escarlata y Violeta) |
+| Showdown format ID | `gen9championsvgc2026regmb` |
 | Datos del formato | `data/formats/champions-mb.json` |
 
 ---

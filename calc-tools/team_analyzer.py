@@ -63,7 +63,9 @@ def parse_showdown_paste(paste: str) -> list[TeamMember]:
         m = re.match(r'^(.+?)(?:\s*@\s*(.+))?$', lines[0])
         if not m:
             continue
-        species = m.group(1).strip().split('(')[0].strip()
+        name_part = m.group(1).strip()
+        paren = re.search(r'\(([^)]+)\)', name_part)
+        species = paren.group(1).strip() if paren else name_part
         item = m.group(2).strip() if m.group(2) else ""
         member = TeamMember(species=species, item=item)
         for line in lines[1:]:
